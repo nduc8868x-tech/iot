@@ -6,8 +6,7 @@ import {
   User,
   Search,
   Bell,
-  Cpu,
-  BarChart2 } from
+  Cpu } from
 'lucide-react';
 import { ConnectionIndicator } from './ConnectionStatus';
 
@@ -52,13 +51,6 @@ export function Header() {
           Lịch sử hoạt động
         </Link>
         <Link
-          to="/stats"
-          className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${isActive('/stats')}`}>
-          
-          <BarChart2 className="w-4 h-4" />
-          Thống kê
-        </Link>
-        <Link
           to="/profile"
           className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium transition-colors ${isActive('/profile')}`}>
           
@@ -90,7 +82,7 @@ export function Header() {
 
         <div className="flex items-center gap-3 pl-5 border-l border-slate-700">
           <div className="text-right hidden sm:block">
-            <div className="text-sm font-semibold">Nguyễn Văn A</div>
+            <div className="text-sm font-semibold">Nguyễn Mạnh Đức</div>
             <div className="text-xs text-slate-400">ADMIN</div>
           </div>
           <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center border border-slate-600">

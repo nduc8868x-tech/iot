@@ -19,7 +19,7 @@ export function Profile() {
             <div className="relative">
               <div className="w-20 h-20 rounded-xl bg-slate-800 border-4 border-white overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80"
+                  src="/avatar.jpg"
                   alt="Profile"
                   className="w-full h-full object-cover" />
               </div>
@@ -32,9 +32,9 @@ export function Profile() {
 
         {/* Profile Info */}
         <div className="pt-12 pb-4 text-center px-6">
-          <h1 className="text-xl font-bold text-slate-900 mb-1">Nguyễn Văn A</h1>
+          <h1 className="text-xl font-bold text-slate-900 mb-1">Nguyễn Mạnh Đức</h1>
           <p className="text-xs font-medium text-blue-600 bg-blue-50 inline-block px-3 py-1 rounded-full">
-            B21DCCN001 • D21CQCN01-B
+            B22DCPT061 • D22CQPT01
           </p>
         </div>
       </div>
@@ -50,10 +50,10 @@ export function Profile() {
 
           <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col justify-between flex-1">
             {[
-              { icon: User, label: 'Họ và tên', value: 'Nguyễn Văn A' },
-              { icon: GraduationCap, label: 'Mã sinh viên', value: 'B21DCCN001' },
-              { icon: GraduationCap, label: 'Lớp', value: 'D21CQCN01-B' },
-              { icon: Mail, label: 'Email', value: 'example@student.edu.vn' },
+              { icon: User, label: 'Họ và tên', value: 'Nguyễn Mạnh Đức' },
+              { icon: GraduationCap, label: 'Mã sinh viên', value: 'B22DCPT061' },
+              { icon: GraduationCap, label: 'Lớp', value: 'D22CQPT01' },
+              { icon: Mail, label: 'Email', value: 'nduc8868x@gmail.com' },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
                 <div className="flex items-center gap-2.5 text-slate-500">

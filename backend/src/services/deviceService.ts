@@ -33,26 +33,6 @@ const devices: Map<string, Device> = new Map([
       lastUpdated: new Date().toISOString(),
     },
   ],
-  [
-    '4',
-    {
-      id: '4',
-      name: 'Đèn phụ',
-      type: 'light',
-      status: false,
-      lastUpdated: new Date().toISOString(),
-    },
-  ],
-  [
-    '5',
-    {
-      id: '5',
-      name: 'Quạt bàn',
-      type: 'fan',
-      status: false,
-      lastUpdated: new Date().toISOString(),
-    },
-  ],
 ]);
 
 export class DeviceService {

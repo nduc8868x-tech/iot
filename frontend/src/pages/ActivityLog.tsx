@@ -5,7 +5,7 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { activityApi } from '../api/activityApi';
 import { ActivityRecord } from '../types';
 
-type DeviceFilter = 'all' | 'Đèn chính' | 'Điều hòa' | 'Quạt trần' | 'Đèn phụ' | 'Quạt bàn';
+type DeviceFilter = 'all' | 'Đèn chính' | 'Điều hòa' | 'Quạt trần';
 type SearchMode   = 'time' | 'info';
 type SortOrder    = 'desc' | 'asc';
 
@@ -108,8 +108,7 @@ export function ActivityLog() {
           <option value="Đèn chính">Đèn chính</option>
           <option value="Điều hòa">Điều hòa</option>
           <option value="Quạt trần">Quạt trần</option>
-          <option value="Đèn phụ">Đèn phụ</option>
-          <option value="Quạt bàn">Quạt bàn</option>
+
         </select>
 
         {/* Dropdown 2 — search mode */}

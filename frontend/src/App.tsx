@@ -9,7 +9,6 @@ import { NetworkStatusBanner } from './components/ConnectionStatus';
 import { Dashboard } from './pages/Dashboard';
 import { EventHistory } from './pages/EventHistory';
 import { ActivityLog } from './pages/ActivityLog';
-import { Statistics } from './pages/Statistics';
 import { Profile } from './pages/Profile';
 import { DeviceProvider } from './context/DeviceContext';
 
@@ -25,7 +24,6 @@ export function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/history" element={<EventHistory />} />
               <Route path="/activity" element={<ActivityLog />} />
-              <Route path="/stats" element={<Statistics />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

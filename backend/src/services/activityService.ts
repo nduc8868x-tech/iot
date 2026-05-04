@@ -6,8 +6,6 @@ const DEVICE_NAMES: Record<string, string> = {
   '1': 'Đèn chính',
   '2': 'Điều hòa',
   '3': 'Quạt trần',
-  '4': 'Đèn phụ',
-  '5': 'Quạt bàn',
 };
 
 export async function getActivity(
