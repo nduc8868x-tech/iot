@@ -1,9 +1,9 @@
 # IoT System - Complete Deployment & User Guide
 
 **Project**: Smart Home IoT Control System  
-**Student**: Nguyễn Văn A (B21DCCN001)  
-**Class**: D21CQCN01-B  
-**Date**: March 2024
+**Student**: Nguyễn Mạnh Đức (B22DCPT061)  
+**Class**: D22CQPT01  
+**Date**: May 2026
 
 ---
 
@@ -130,7 +130,8 @@ npm run lint
 - **Status Tracking**: Success/failure indicators
 
 ### ✅ Profile (/profile)
-- **Student Information**: Name, ID, class
+
+- **Student Information**: Nguyễn Mạnh Đức, B22DCPT061, D22CQPT01
 - **Documentation Links**: API, architecture, database
 - **Project Details**: Overview and features
 
@@ -389,12 +390,13 @@ docker run -p 5173:5173 iot-system
 
 ## Contact
 
-**Student**: Nguyễn Văn A  
-**ID**: B21DCCN001  
-**Class**: D21CQCN01-B  
-**Email**: [your-email@university.edu]
+**Student**: Nguyễn Mạnh Đức  
+**ID**: B22DCPT061  
+**Class**: D22CQPT01  
+**Email**: [nduc8868x@gmail.com](mailto:nduc8868x@gmail.com)  
+**GitHub**: [nduc8868x-tech/iot](https://github.com/nduc8868x-tech/iot)
 
 ---
 
-**Last Updated**: March 22, 2024  
-**Version**: 1.0.0
+**Last Updated**: May 4, 2026  
+**Version**: 1.1.0

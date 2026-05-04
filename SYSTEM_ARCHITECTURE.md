@@ -450,6 +450,7 @@ Database: Cloud database (RDS, Cloud SQL, etc.)
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: March 2024  
-**Maintainer**: Student Name (B21DCCN001)
+**Document Version**: 1.1  
+**Last Updated**: May 2026  
+**Maintainer**: Nguyễn Mạnh Đức (B22DCPT061) — D22CQPT01  
+**Repository**: [nduc8868x-tech/iot](https://github.com/nduc8868x-tech/iot)
