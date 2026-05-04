@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/admin/Downloads/iot\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"C:/Users/admin/Downloads/iot/src\" && grep -rl \"^import React from 'react';\" . | while read f; do\n  sed -i \"s/^import React from 'react';\\\\n//g\" \"$f\"\ndone)",
+      "Bash(cd \"C:/Users/admin/Downloads/iot/src\" && for f in App.tsx components/ConnectionStatus.tsx components/Header.tsx components/MetricCard.tsx components/Pagination.tsx components/SensorChart.tsx components/ui/LoadingSpinner.tsx pages/Profile.tsx index.tsx; do\n  sed -i \"1{/^import React from 'react';$/d}\" \"$f\"\ndone)",
+      "Bash(for f:*)",
+      "Bash(cd \"C:/Users/admin/Downloads/iot/frontend\" && npx tsc --noEmit 2>&1 | head -30)",
+      "Bash(cd \"C:/Users/admin/Downloads/iot/frontend\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"C:/Users/admin/Downloads/iot/backend\" && npx tsc --noEmit 2>&1)"
+    ]
+  }
+}
