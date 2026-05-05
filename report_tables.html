@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bảng báo cáo – IoT Smart Home</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13pt;
+      background: #f5f5f5;
+      padding: 40px;
+      color: #1a1a1a;
+    }
+    .page {
+      background: #fff;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 50px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+    .table-block {
+      margin-bottom: 48px;
+    }
+    .table-title {
+      font-size: 12pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12pt;
+    }
+    thead tr {
+      background-color: #1e3a5f;
+      color: #fff;
+    }
+    thead th {
+      padding: 10px 14px;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid #1e3a5f;
+    }
+    tbody tr:nth-child(even) {
+      background-color: #eaf0f8;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+    tbody tr:hover {
+      background-color: #d0e4f7;
+    }
+    tbody td {
+      padding: 9px 14px;
+      border: 1px solid #c0cfe0;
+      vertical-align: middle;
+    }
+    td.center { text-align: center; }
+    td.bold   { font-weight: bold; }
+    code {
+      background: #f0f4f8;
+      border: 1px solid #c8d6e5;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 11pt;
+      color: #c0392b;
+    }
+    .section-label {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1e3a5f;
+      margin-bottom: 4px;
+      margin-top: 32px;
+    }
+    hr { border: none; border-top: 2px solid #c0cfe0; margin: 40px 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ===== BẢNG 2.1 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.1 – Kiến trúc 4 lớp của hệ thống IoT</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Lớp</th>
+          <th>Chức năng</th>
+          <th>Ví dụ trong đề tài</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bold">Perception Layer (Cảm nhận)</td>
+          <td>Thu thập dữ liệu từ môi trường</td>
+          <td>ESP32, cảm biến DHT22, LDR</td>
+        </tr>
+        <tr>
+          <td class="bold">Network Layer (Mạng)</td>
+          <td>Truyền tải dữ liệu</td>
+          <td>MQTT, Wi-Fi</td>
+        </tr>
+        <tr>
+          <td class="bold">Processing Layer (Xử lý)</td>
+          <td>Lưu trữ và xử lý dữ liệu</td>
+          <td>Node.js Backend, MongoDB Atlas</td>
+        </tr>
+        <tr>
+          <td class="bold">Application Layer (Ứng dụng)</td>
+          <td>Giao diện người dùng</td>
+          <td>React Web Dashboard</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.2 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.2 – Các nguyên tắc REST được áp dụng</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nguyên tắc</th>
+          <th>Mô tả</th>
+          <th>Áp dụng trong đề tài</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bold">Stateless</td>
+          <td>Mỗi request độc lập, không lưu session</td>
+          <td>Backend không lưu session người dùng</td>
+        </tr>
+        <tr>
+          <td class="bold">Uniform Interface</td>
+          <td>URL rõ ràng theo tài nguyên</td>
+          <td><code>/api/devices</code>, <code>/api/sensors/latest</code></td>
+        </tr>
+        <tr>
+          <td class="bold">Client-Server</td>
+          <td>Tách biệt frontend và backend</td>
+          <td>React (port 5173) ↔ Node.js (port 3000)</td>
+        </tr>
+        <tr>
+          <td class="bold">Layered System</td>
+          <td>Có thể thêm middleware</td>
+          <td><code>requestLogger</code>, CORS middleware</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.3 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.3 – HTTP Status Codes sử dụng trong API</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Mã trạng thái</th>
+          <th style="width:28%">Ý nghĩa</th>
+          <th>Trường hợp áp dụng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="center"><code>200 OK</code></td>
+          <td>Thành công</td>
+          <td>GET, POST thành công</td>
+        </tr>
+        <tr>
+          <td class="center"><code>400 Bad Request</code></td>
+          <td>Dữ liệu đầu vào sai</td>
+          <td>Action không phải <code>ON</code> / <code>OFF</code></td>
+        </tr>
+        <tr>
+          <td class="center"><code>404 Not Found</code></td>
+          <td>Tài nguyên không tồn tại</td>
+          <td>Device ID không hợp lệ</td>
+        </tr>
+        <tr>
+          <td class="center"><code>500 Internal Server Error</code></td>
+          <td>Lỗi server</td>
+          <td>Lỗi MongoDB, lỗi không xác định</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.4 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.4 – So sánh thông số ESP32 và ESP8266</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Thông số</th>
+          <th>ESP32</th>
+          <th>ESP8266</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bold">CPU</td>
+          <td>Dual-core Xtensa LX6, 240 MHz</td>
+          <td>Single-core, 80/160 MHz</td>
+        </tr>
+        <tr>
+          <td class="bold">RAM</td>
+          <td>520 KB SRAM</td>
+          <td>96 KB SRAM</td>
+        </tr>
+        <tr>
+          <td class="bold">Flash</td>
+          <td>4 MB</td>
+          <td>4 MB</td>
+        </tr>
+        <tr>
+          <td class="bold">Wi-Fi</td>
+          <td>802.11 b/g/n</td>
+          <td>802.11 b/g/n</td>
+        </tr>
+        <tr>
+          <td class="bold">Bluetooth</td>
+          <td>BLE 4.2 + Classic</td>
+          <td>Không có</td>
+        </tr>
+        <tr>
+          <td class="bold">GPIO</td>
+          <td>34 pins</td>
+          <td>17 pins</td>
+        </tr>
+        <tr>
+          <td class="bold">ADC</td>
+          <td>12-bit, 18 kênh</td>
+          <td>10-bit, 1 kênh</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.5 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.5 – Thông số kỹ thuật cảm biến DHT22</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:45%">Thông số</th>
+          <th>Giá trị</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Dải đo nhiệt độ</td><td class="center">−40°C đến +80°C</td></tr>
+        <tr><td>Độ chính xác nhiệt độ</td><td class="center">±0.5°C</td></tr>
+        <tr><td>Dải đo độ ẩm</td><td class="center">0% đến 100% RH</td></tr>
+        <tr><td>Độ chính xác độ ẩm</td><td class="center">±2–5% RH</td></tr>
+        <tr><td>Thời gian lấy mẫu tối thiểu</td><td class="center">2 giây</td></tr>
+        <tr><td>Điện áp hoạt động</td><td class="center">3.3V – 5V</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.6 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.6 – Danh sách thiết bị điều khiển trong hệ thống</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%">ID</th>
+          <th>Tên thiết bị</th>
+          <th>Loại</th>
+          <th>Giao diện phần cứng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="center bold">1</td>
+          <td>Đèn chính</td>
+          <td class="center"><code>light</code></td>
+          <td>LED hoặc Relay + đèn</td>
+        </tr>
+        <tr>
+          <td class="center bold">2</td>
+          <td>Điều hòa</td>
+          <td class="center"><code>ac</code></td>
+          <td>Relay module</td>
+        </tr>
+        <tr>
+          <td class="center bold">3</td>
+          <td>Quạt trần</td>
+          <td class="center"><code>fan</code></td>
+          <td>Relay module</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.7 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.7 – Thư viện và framework Backend</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Thư viện</th>
+          <th style="width:16%">Phiên bản</th>
+          <th>Chức năng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Node.js</b></td><td class="center">v18+</td><td>Runtime JavaScript phía server</td></tr>
+        <tr><td><b>Express.js</b></td><td class="center">4.18</td><td>Web framework, routing, middleware</td></tr>
+        <tr><td><b>TypeScript</b></td><td class="center">5.3</td><td>Static typing cho JavaScript</td></tr>
+        <tr><td><b>Mongoose</b></td><td class="center">8.x</td><td>ODM kết nối MongoDB, định nghĩa Schema</td></tr>
+        <tr><td><b>mqtt</b></td><td class="center">5.x</td><td>MQTT client, publish/subscribe</td></tr>
+        <tr><td><b>date-fns</b></td><td class="center">4.x</td><td>Định dạng và xử lý ngày giờ</td></tr>
+        <tr><td><b>cors</b></td><td class="center">2.x</td><td>Xử lý Cross-Origin Resource Sharing</td></tr>
+        <tr><td><b>tsx</b></td><td class="center">4.x</td><td>Chạy TypeScript trực tiếp (dev mode)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.8 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.8 – Thư viện và framework Frontend</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Thư viện</th>
+          <th style="width:16%">Phiên bản</th>
+          <th>Chức năng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>React</b></td><td class="center">18.3</td><td>UI framework, component-based</td></tr>
+        <tr><td><b>TypeScript</b></td><td class="center">5.5</td><td>Type safety cho frontend</td></tr>
+        <tr><td><b>Vite</b></td><td class="center">5.2</td><td>Build tool, dev server cực nhanh</td></tr>
+        <tr><td><b>React Router</b></td><td class="center">6.26</td><td>Client-side routing (SPA)</td></tr>
+        <tr><td><b>Tailwind CSS</b></td><td class="center">3.4</td><td>Utility-first CSS framework</td></tr>
+        <tr><td><b>Recharts</b></td><td class="center">2.12</td><td>Biểu đồ dữ liệu cảm biến</td></tr>
+        <tr><td><b>Lucide React</b></td><td class="center">0.x</td><td>Bộ icon SVG</td></tr>
+        <tr><td><b>date-fns</b></td><td class="center">4.x</td><td>Định dạng timestamp</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.9 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.9 – Thông số MongoDB Atlas</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:35%">Đặc điểm</th>
+          <th>Mô tả</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Loại</b></td><td>Document-oriented NoSQL</td></tr>
+        <tr><td><b>Lưu trữ</b></td><td>BSON (Binary JSON)</td></tr>
+        <tr><td><b>Triển khai</b></td><td>Cloud — AWS / GCP / Azure</td></tr>
+        <tr><td><b>Free Tier</b></td><td>512 MB, shared cluster</td></tr>
+        <tr><td><b>ODM</b></td><td>Mongoose 8.x</td></tr>
+        <tr><td><b>Indexing</b></td><td>Index trên <code>timestamp</code> để query nhanh</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+
+  <!-- ===== BẢNG 2.10 ===== -->
+  <div class="table-block">
+    <div class="table-title">Bảng 2.10 – Thông số MQTT Broker Mosquitto</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%">Thông số</th>
+          <th>Giá trị</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Phiên bản MQTT hỗ trợ</b></td><td class="center">3.1 / 3.1.1 / 5.0</td></tr>
+        <tr><td><b>Port TCP</b></td><td class="center">1883</td></tr>
+        <tr><td><b>Port WebSocket</b></td><td class="center">9001</td></tr>
+        <tr><td><b>License</b></td><td class="center">EPL / EDL (mã nguồn mở)</td></tr>
+        <tr><td><b>Nền tảng hỗ trợ</b></td><td class="center">Windows, Linux, macOS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

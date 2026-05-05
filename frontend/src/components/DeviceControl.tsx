@@ -100,7 +100,7 @@ function DeviceItem({
 }
 
 export function DeviceControl() {
-  const { devices, isLoading } = useDeviceContext();
+  const { devices, isLoading, updateDeviceStatus } = useDeviceContext();
   const { isConnected } = useConnectionStatus();
 
   const handleDeviceControl = async (deviceId: string, action: 'ON' | 'OFF') => {
@@ -109,6 +109,8 @@ export function DeviceControl() {
       if (!response.success) {
         throw new Error(response.data?.message ?? 'Failed to control device');
       }
+      // Update UI immediately after successful API call
+      updateDeviceStatus(deviceId, action === 'ON');
     } catch (error) {
       console.error('Device control error:', error);
       throw error;

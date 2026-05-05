@@ -1,0 +1,681 @@
+openapi: 3.0.3
+info:
+  title: IoT Smart Home API
+  description: |
+    REST API cho hệ thống điều khiển và giám sát nhà thông minh.
+
+    **Sinh viên**: Nguyễn Mạnh Đức (B22DCPT061) — D22CQPT01
+    **GitHub**: https://github.com/nduc8868x-tech/iot
+  version: 1.1.0
+  contact:
+    name: Nguyễn Mạnh Đức
+    email: nduc8868x@gmail.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+
+tags:
+  - name: Health
+    description: Kiểm tra trạng thái server
+  - name: Devices
+    description: Quản lý và điều khiển thiết bị
+  - name: Sensors
+    description: Dữ liệu cảm biến môi trường
+  - name: Activity
+    description: Lịch sử hoạt động thiết bị
+
+paths:
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Kiểm tra trạng thái server
+      description: Frontend gọi mỗi 30 giây để kiểm tra kết nối backend.
+      responses:
+        '200':
+          description: Server hoạt động bình thường
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseHealthData'
+              example:
+                success: true
+                data:
+                  status: ok
+                timestamp: '2026-05-04T02:00:00.000Z'
+
+  /devices:
+    get:
+      tags: [Devices]
+      summary: Lấy danh sách tất cả thiết bị
+      responses:
+        '200':
+          description: Danh sách 3 thiết bị
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Device'
+              example:
+                success: true
+                data:
+                  - id: '1'
+                    name: Đèn chính
+                    type: light
+                    status: false
+                    lastUpdated: '2026-05-04T02:00:00.000Z'
+                  - id: '2'
+                    name: Điều hòa
+                    type: ac
+                    status: true
+                    lastUpdated: '2026-05-04T02:00:00.000Z'
+                  - id: '3'
+                    name: Quạt trần
+                    type: fan
+                    status: false
+                    lastUpdated: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /devices/{deviceId}/status:
+    get:
+      tags: [Devices]
+      summary: Lấy trạng thái một thiết bị
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      responses:
+        '200':
+          description: Trạng thái thiết bị
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DeviceStatus'
+              example:
+                success: true
+                data:
+                  id: '1'
+                  status: true
+                  timestamp: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /devices/{deviceId}/control:
+    post:
+      tags: [Devices]
+      summary: Bật / Tắt thiết bị
+      description: |
+        Gửi lệnh điều khiển. Backend sẽ:
+        1. Cập nhật trạng thái in-memory
+        2. Publish lệnh đến MQTT topic `iot/device/{id}/control`
+        3. Ghi log vào MongoDB (collection DeviceAction)
+      parameters:
+        - $ref: '#/components/parameters/deviceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceControlRequest'
+            examples:
+              turnOn:
+                summary: Bật thiết bị
+                value:
+                  action: 'ON'
+              turnOff:
+                summary: Tắt thiết bị
+                value:
+                  action: 'OFF'
+      responses:
+        '200':
+          description: Điều khiển thành công
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DeviceControlResponse'
+              example:
+                success: true
+                data:
+                  success: true
+                  deviceId: '1'
+                  newStatus: true
+                  message: Device 1 turned ON
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '400':
+          description: Action không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+              example:
+                success: false
+                error: Invalid action. Must be ON or OFF
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /sensors/latest:
+    get:
+      tags: [Sensors]
+      summary: Dữ liệu cảm biến mới nhất
+      description: Trả về giá trị nhiệt độ, độ ẩm, ánh sáng được cập nhật liên tục từ MQTT.
+      responses:
+        '200':
+          description: Dữ liệu cảm biến hiện tại
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SensorLatest'
+              example:
+                success: true
+                data:
+                  temperature:
+                    value: 27.5
+                    unit: °C
+                    timestamp: '2026-05-04T02:00:00.000Z'
+                  humidity:
+                    value: 65
+                    unit: '%'
+                    timestamp: '2026-05-04T02:00:00.000Z'
+                  light:
+                    value: 320.5
+                    unit: Lux
+                    timestamp: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+
+  /sensors/temperature:
+    get:
+      tags: [Sensors]
+      summary: Nhiệt độ mới nhất
+      responses:
+        '200':
+          description: Giá trị nhiệt độ
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SensorReading'
+              example:
+                success: true
+                data:
+                  value: 27.5
+                  unit: °C
+                  timestamp: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+
+  /sensors/humidity:
+    get:
+      tags: [Sensors]
+      summary: Độ ẩm mới nhất
+      responses:
+        '200':
+          description: Giá trị độ ẩm
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SensorReading'
+              example:
+                success: true
+                data:
+                  value: 65
+                  unit: '%'
+                  timestamp: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+
+  /sensors/light:
+    get:
+      tags: [Sensors]
+      summary: Ánh sáng mới nhất
+      responses:
+        '200':
+          description: Giá trị ánh sáng
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/SensorReading'
+              example:
+                success: true
+                data:
+                  value: 320.5
+                  unit: Lux
+                  timestamp: '2026-05-04T02:00:00.000Z'
+                timestamp: '2026-05-04T02:00:00.000Z'
+
+  /sensors/history:
+    get:
+      tags: [Sensors]
+      summary: Lịch sử cảm biến (phân trang)
+      description: |
+        Lấy lịch sử dữ liệu cảm biến từ MongoDB.
+        Mỗi bản ghi chứa đồng thời nhiệt độ + độ ẩm + ánh sáng.
+        Frontend (EventHistory) flatten 1 bản ghi thành 3 dòng hiển thị.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Danh sách lịch sử cảm biến có phân trang
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedSensorHistory'
+              example:
+                success: true
+                data:
+                  records:
+                    - id: 1
+                      deviceId: '#A3F2'
+                      temperature: 27.9
+                      humidity: 55
+                      light: 117.22
+                      timestamp: '02:00:00 04/05/2026'
+                  total: 150
+                  page: 1
+                  limit: 10
+                  totalPages: 15
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /activity:
+    get:
+      tags: [Activity]
+      summary: Lịch sử hoạt động thiết bị (phân trang)
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Danh sách log hành động có phân trang
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PaginatedActivity'
+              example:
+                success: true
+                data:
+                  records:
+                    - id: 1
+                      device: Đèn chính
+                      deviceId: '#1'
+                      action: BẬT
+                      status: Thành công
+                      timestamp: '02:00:00 04/05/2026'
+                  total: 42
+                  page: 1
+                  limit: 10
+                  totalPages: 5
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /activity/stats:
+    get:
+      tags: [Activity]
+      summary: Thống kê hành động theo ngày
+      description: Trả về số lần điều khiển mỗi thiết bị theo từng ngày, dùng để vẽ biểu đồ.
+      responses:
+        '200':
+          description: Dữ liệu thống kê
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponseBase'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ActivityStats'
+              example:
+                success: true
+                data:
+                  dates:
+                    - date: 04/05/2026
+                      Đèn chính: 5
+                      Điều hòa: 3
+                      Quạt trần: 2
+                  devices:
+                    - Đèn chính
+                    - Điều hòa
+                    - Quạt trần
+                timestamp: '2026-05-04T02:00:00.000Z'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    deviceId:
+      name: deviceId
+      in: path
+      required: true
+      description: ID thiết bị (1 = Đèn chính, 2 = Điều hòa, 3 = Quạt trần)
+      schema:
+        type: string
+        enum: ['1', '2', '3']
+      example: '1'
+
+    page:
+      name: page
+      in: query
+      required: false
+      description: Số trang (bắt đầu từ 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: Số bản ghi mỗi trang (tối đa 100)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+  schemas:
+    ApiResponseBase:
+      type: object
+      required: [success, timestamp]
+      properties:
+        success:
+          type: boolean
+          description: true nếu request thành công
+        timestamp:
+          type: string
+          format: date-time
+          description: Thời điểm server xử lý request
+
+    ApiResponseError:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            success:
+              example: false
+            error:
+              type: string
+              description: Thông báo lỗi
+
+    ApiResponseHealthData:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: ok
+
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1'
+        name:
+          type: string
+          example: Đèn chính
+        type:
+          type: string
+          enum: [light, ac, fan, other]
+          example: light
+        status:
+          type: boolean
+          description: true = BẬT, false = TẮT
+          example: false
+        lastUpdated:
+          type: string
+          format: date-time
+          example: '2026-05-04T02:00:00.000Z'
+
+    DeviceStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1'
+        status:
+          type: boolean
+          example: true
+        timestamp:
+          type: string
+          format: date-time
+
+    DeviceControlRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [ON, OFF]
+          description: Lệnh điều khiển
+          example: ON
+
+    DeviceControlResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        deviceId:
+          type: string
+          example: '1'
+        newStatus:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Device 1 turned ON
+
+    SensorReading:
+      type: object
+      properties:
+        value:
+          type: number
+          example: 27.5
+        unit:
+          type: string
+          example: °C
+        timestamp:
+          type: string
+          format: date-time
+
+    SensorLatest:
+      type: object
+      properties:
+        temperature:
+          $ref: '#/components/schemas/SensorReading'
+        humidity:
+          $ref: '#/components/schemas/SensorReading'
+        light:
+          $ref: '#/components/schemas/SensorReading'
+
+    SensorHistoryRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        deviceId:
+          type: string
+          description: 4 ký tự cuối MongoDB ObjectId
+          example: '#A3F2'
+        temperature:
+          type: number
+          example: 27.9
+        humidity:
+          type: number
+          example: 55
+        light:
+          type: number
+          example: 117.22
+        timestamp:
+          type: string
+          description: Định dạng HH:mm:ss dd/MM/yyyy
+          example: '02:00:00 04/05/2026'
+
+    PaginatedSensorHistory:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensorHistoryRecord'
+        total:
+          type: integer
+          example: 150
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 15
+
+    ActivityRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        device:
+          type: string
+          example: Đèn chính
+        deviceId:
+          type: string
+          example: '#1'
+        action:
+          type: string
+          enum: [BẬT, TẮT]
+          example: BẬT
+        status:
+          type: string
+          enum: [Thành công, Thất bại]
+          example: Thành công
+        timestamp:
+          type: string
+          description: Định dạng HH:mm:ss dd/MM/yyyy
+          example: '02:00:00 04/05/2026'
+
+    PaginatedActivity:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityRecord'
+        total:
+          type: integer
+          example: 42
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        totalPages:
+          type: integer
+          example: 5
+
+    ActivityStats:
+      type: object
+      properties:
+        dates:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: integer
+          example:
+            - date: 04/05/2026
+              Đèn chính: 5
+              Điều hòa: 3
+              Quạt trần: 2
+        devices:
+          type: array
+          items:
+            type: string
+          example: [Đèn chính, Điều hòa, Quạt trần]
+
+  responses:
+    NotFound:
+      description: Không tìm thấy tài nguyên
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            error: Device not found
+            timestamp: '2026-05-04T02:00:00.000Z'
+
+    InternalError:
+      description: Lỗi server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponseError'
+          example:
+            success: false
+            error: Internal server error
+            timestamp: '2026-05-04T02:00:00.000Z'

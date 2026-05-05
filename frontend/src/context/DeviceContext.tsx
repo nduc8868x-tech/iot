@@ -17,19 +17,25 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState<string | null>(null);
 
+  const VALID_IDS = ['1', '2', '3'];
+
   const loadDevices = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Try localStorage cache first for instant render
+      // Try localStorage cache first for instant render (filter stale extra devices)
       const cached = localStorage.getItem('devices');
-      if (cached) setDevices(JSON.parse(cached));
+      if (cached) {
+        const parsed = JSON.parse(cached) as Device[];
+        setDevices(parsed.filter((d) => VALID_IDS.includes(d.id)));
+      }
 
       // Fetch from backend
       const res = await deviceApi.getAll();
       if (res.success && res.data) {
-        setDevices(res.data);
-        localStorage.setItem('devices', JSON.stringify(res.data));
+        const valid = res.data.filter((d) => VALID_IDS.includes(d.id));
+        setDevices(valid);
+        localStorage.setItem('devices', JSON.stringify(valid));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load devices');

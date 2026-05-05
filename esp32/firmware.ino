@@ -4,11 +4,11 @@
 #include <math.h>
 
 // ================= WIFI =================
-const char* ssid = "DO LA 2";
-const char* password = "12345679";
+const char* ssid = "manhduc";
+const char* password = "12345678";
 
 // ================= MQTT =================
-const char* mqtt_server = "192.168.0.103";
+const char* mqtt_server = "10.52.211.216";
 const int mqtt_port = 1883;
 const char* mqtt_user = "nmd";
 const char* mqtt_password = "123";
@@ -46,13 +46,18 @@ const unsigned long publishInterval = 2000; // 2 seconds
 float readLux() {
   int rawLight = analogRead(LDR_PIN);
 
-  if (rawLight <= 0) return 0;
-  if (rawLight >= 4095) return 10000;
+  if (rawLight <= 0)    return 0;
+  if (rawLight >= 4095) return 0;
 
-  // Simple linear mapping: 0-4095 ADC to 0-10000 Lux
-  // Adjust the 10000 multiplier based on your actual light measurements
-  float lux = (rawLight / 4095.0) * 10000.0;
-  
+  // Wiring: VCC → 10kΩ → GPIO34 → LDR → GND
+  // High ADC = dark (high R_LDR), Low ADC = bright (low R_LDR)
+  float R_LDR = 10000.0 * rawLight / (4095.0 - rawLight);
+
+  // LDR characteristic curve: lux = 10 * (RL10*1000 / R_LDR)^(1/GAMMA)
+  float lux = 10.0 * pow((RL10 * 1000.0) / R_LDR, 1.0 / GAMMA);
+
+  if (lux > 100000) lux = 100000;
+
   return lux;
 }
 

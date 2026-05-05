@@ -75,13 +75,15 @@ export function Profile() {
 
           <div className="flex flex-col gap-3 flex-1">
             {[
-              { icon: Github, title: 'Mã nguồn', desc: 'Kho lưu trữ Frontend & Backend' },
-              { icon: FileText, title: 'Báo cáo đồ án', desc: 'Tài liệu báo cáo chi tiết' },
-              { icon: Code, title: 'Tài liệu API', desc: 'Chi tiết các Endpoint & Model' },
-            ].map(({ icon: Icon, title, desc }) => (
+              { icon: Github, title: 'Mã nguồn', desc: 'Kho lưu trữ Frontend & Backend', href: 'https://github.com/nduc8868x-tech/iot' },
+              { icon: FileText, title: 'Báo cáo đồ án', desc: 'Tài liệu báo cáo chi tiết', href: 'https://docs.google.com/document/d/1QBKV4B1bjCnji1PBON3wBLVuckQnbOAws8llMpBEnXw/edit?tab=t.0' },
+              { icon: Code, title: 'Tài liệu API', desc: 'Chi tiết các Endpoint & Model', href: '/swagger.html' },
+            ].map(({ icon: Icon, title, desc, href }) => (
               <a
                 key={title}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex-1 flex items-center gap-4 bg-white rounded-xl px-5 py-4 shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group">
                 <div className="p-2.5 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors flex-shrink-0">
                   <Icon className="w-5 h-5 text-slate-700 group-hover:text-blue-600" />

@@ -1,44 +1,94 @@
-# IoT System API Documentation
+# Tài Liệu API — Hệ thống IoT Smart Home
 
-## Base URL
-```
-http://localhost:3000/api
-```
-
-## Environment Variables
-```
-REACT_APP_API_URL=http://localhost:3000/api
-REACT_APP_MQTT_BROKER=ws://localhost:9001
-```
+**Base URL**: `http://localhost:3000/api`  
+**Format**: JSON  
+**Encoding**: UTF-8
 
 ---
 
-## Endpoints
+## Mục lục
 
-### 1. Health Check
+1. [Cấu trúc Response chung](#1-cấu-trúc-response-chung)
+2. [Health Check](#2-health-check)
+3. [Devices — Thiết bị](#3-devices--thiết-bị)
+4. [Sensors — Cảm biến](#4-sensors--cảm-biến)
+5. [Activity — Lịch sử hoạt động](#5-activity--lịch-sử-hoạt-động)
+6. [MQTT Topics](#6-mqtt-topics)
+7. [Mã lỗi HTTP](#7-mã-lỗi-http)
 
-**GET** `/health`
+---
 
-Check API server connection status.
+## 1. Cấu trúc Response chung
 
-**Response:**
+Mọi response đều theo cấu trúc chuẩn:
+
 ```json
 {
   "success": true,
-  "status": "ok",
-  "timestamp": "2024-03-22T10:30:00Z"
+  "data": { ... },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+Khi xảy ra lỗi:
+
+```json
+{
+  "success": false,
+  "error": "Thông báo lỗi",
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+| Trường | Kiểu | Mô tả |
+| :--- | :--- | :--- |
+| `success` | boolean | `true` nếu request thành công |
+| `data` | object / array | Dữ liệu trả về (chỉ có khi success=true) |
+| `error` | string | Thông báo lỗi (chỉ có khi success=false) |
+| `timestamp` | string (ISO 8601) | Thời điểm server xử lý request |
+
+---
+
+## 2. Health Check
+
+### GET `/api/health`
+
+Kiểm tra trạng thái server. Frontend dùng endpoint này mỗi 30 giây để kiểm tra kết nối.
+
+**Request**: Không có body, không có params.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "ok"
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
 }
 ```
 
 ---
 
-### 2. Get All Devices
+## 3. Devices — Thiết bị
 
-**GET** `/devices`
+Hệ thống quản lý **3 thiết bị**:
 
-Retrieve list of all IoT devices.
+| deviceId | Tên | Loại |
+| :---: | :--- | :--- |
+| `1` | Đèn chính | light |
+| `2` | Điều hòa | ac |
+| `3` | Quạt trần | fan |
 
-**Response:**
+---
+
+### GET `/api/devices`
+
+Lấy danh sách toàn bộ thiết bị.
+
+**Request**: Không có params.
+
+**Response 200:**
 ```json
 {
   "success": true,
@@ -47,85 +97,96 @@ Retrieve list of all IoT devices.
       "id": "1",
       "name": "Đèn chính",
       "type": "light",
-      "status": true,
-      "lastUpdated": "2024-03-22T10:30:00Z"
+      "status": false,
+      "lastUpdated": "2026-05-04T02:00:00.000Z"
     },
     {
       "id": "2",
       "name": "Điều hòa",
       "type": "ac",
-      "status": false,
-      "lastUpdated": "2024-03-22T10:25:00Z"
+      "status": true,
+      "lastUpdated": "2026-05-04T02:00:00.000Z"
     },
     {
       "id": "3",
       "name": "Quạt trần",
       "type": "fan",
-      "status": true,
-      "lastUpdated": "2024-03-22T10:28:00Z"
+      "status": false,
+      "lastUpdated": "2026-05-04T02:00:00.000Z"
     }
   ],
-  "timestamp": "2024-03-22T10:30:00Z"
+  "timestamp": "2026-05-04T02:00:00.000Z"
 }
 ```
 
-**Status Codes:**
-- `200` - Successfully retrieved devices
-- `500` - Server error
+**Cấu trúc Device object:**
+
+| Trường | Kiểu | Mô tả |
+| :--- | :--- | :--- |
+| `id` | string | ID thiết bị ("1", "2", "3") |
+| `name` | string | Tên hiển thị |
+| `type` | string | `"light"` / `"ac"` / `"fan"` / `"other"` |
+| `status` | boolean | `true` = BẬT, `false` = TẮT |
+| `lastUpdated` | string | ISO 8601, lần cập nhật cuối |
 
 ---
 
-### 3. Get Device Status
+### GET `/api/devices/:deviceId/status`
 
-**GET** `/devices/{deviceId}/status`
+Lấy trạng thái của một thiết bị theo ID.
 
-Get current status of a specific device.
+**Path Params:**
 
-**URL Parameters:**
-- `deviceId` (string, required) - Device ID
+| Param | Kiểu | Ví dụ |
+| :--- | :--- | :--- |
+| `deviceId` | string | `1`, `2`, `3` |
 
-**Response:**
+**Response 200:**
 ```json
 {
   "success": true,
   "data": {
     "id": "1",
     "status": true,
-    "timestamp": "2024-03-22T10:30:00Z"
+    "timestamp": "2026-05-04T02:00:00.000Z"
   },
-  "timestamp": "2024-03-22T10:30:00Z"
+  "timestamp": "2026-05-04T02:00:00.000Z"
 }
 ```
 
-**Status Codes:**
-- `200` - Successfully retrieved device status
-- `404` - Device not found
-- `500` - Server error
+**Response 404** (thiết bị không tồn tại):
+```json
+{
+  "success": false,
+  "error": "Device not found",
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
 
 ---
 
-### 4. Control Device (ON/OFF)
+### POST `/api/devices/:deviceId/control`
 
-**POST** `/devices/{deviceId}/control`
+Điều khiển bật/tắt thiết bị. Backend sẽ publish lệnh đến MQTT topic `iot/device/{id}/control` và ghi log vào MongoDB.
 
-Send control command to device (turn ON or OFF).
+**Path Params:**
 
-**URL Parameters:**
-- `deviceId` (string, required) - Device ID
+| Param | Kiểu | Ví dụ |
+| :--- | :--- | :--- |
+| `deviceId` | string | `1`, `2`, `3` |
 
 **Request Body:**
 ```json
 {
-  "action": "ON",
-  "timestamp": "2024-03-22T10:30:00Z"
+  "action": "ON"
 }
 ```
 
-**Parameters:**
-- `action` (string, required) - "ON" or "OFF"
-- `timestamp` (string, required) - ISO 8601 timestamp
+| Trường | Kiểu | Bắt buộc | Giá trị hợp lệ |
+| :--- | :--- | :---: | :--- |
+| `action` | string | Có | `"ON"` hoặc `"OFF"` |
 
-**Response:**
+**Response 200:**
 ```json
 {
   "success": true,
@@ -133,190 +194,339 @@ Send control command to device (turn ON or OFF).
     "success": true,
     "deviceId": "1",
     "newStatus": true,
-    "message": "Device turned ON successfully"
+    "message": "Device 1 turned ON"
   },
-  "timestamp": "2024-03-22T10:30:00Z"
+  "timestamp": "2026-05-04T02:00:00.000Z"
 }
 ```
 
-**Status Codes:**
-- `200` - Command sent successfully
-- `404` - Device not found
-- `500` - Server error
-
-**Important Notes:**
-- UI shows loading state immediately after request
-- UI updates to reflect new state only after successful response
-- If request fails, UI reverts to previous state
-- All device control requests are queued to prevent race conditions
-
----
-
-### 5. Publish MQTT Message
-
-**POST** `/mqtt/publish`
-
-Publish message to MQTT topic (for direct hardware communication testing).
-
-**Request Body:**
-```json
-{
-  "topic": "iot/device/1/control",
-  "message": "ON",
-  "timestamp": "2024-03-22T10:30:00Z"
-}
-```
-
-**Parameters:**
-- `topic` (string, required) - MQTT topic
-- `message` (string, required) - Message payload
-- `timestamp` (string, required) - ISO 8601 timestamp
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Message published successfully",
-  "topic": "iot/device/1/control",
-  "timestamp": "2024-03-22T10:30:00Z"
-}
-```
-
-**Status Codes:**
-- `200` - Message published successfully
-- `500` - Server error
-
----
-
-## MQTT Topics
-
-### Publishing (Frontend → Hardware)
-
-```
-iot/device/{deviceId}/control    → Send ON/OFF commands
-```
-
-**Message Format:**
-```
-ON    (turn device on)
-OFF   (turn device off)
-```
-
-### Subscribing (Hardware → Frontend)
-
-```
-iot/sensor/temperature     → Temperature readings
-iot/sensor/humidity        → Humidity readings
-iot/sensor/light           → Light sensor readings
-iot/device/{deviceId}/status     → Device status changes
-```
-
-**Message Format:**
-```json
-{
-  "value": 23.5,
-  "unit": "°C",
-  "timestamp": "2024-03-22T10:30:00Z"
-}
-```
-
----
-
-## Error Handling
-
-### Error Response Format
+**Response 400** (action không hợp lệ):
 ```json
 {
   "success": false,
-  "error": "Error description",
-  "timestamp": "2024-03-22T10:30:00Z"
+  "error": "Invalid action. Must be ON or OFF",
+  "timestamp": "2026-05-04T02:00:00.000Z"
 }
 ```
 
-### Common Errors
-| Error | Description |
-|-------|-------------|
-| `Device not found` | Specified device ID doesn't exist |
-| `Invalid action` | Action must be "ON" or "OFF" |
-| `Connection failed` | Cannot connect to MQTT broker |
-| `Timeout` | Request took too long |
-
----
-
-## Rate Limiting
-
-- Maximum 10 requests per second per IP
-- Maximum 5 control commands per device per minute
-
----
-
-## Connection Handling
-
-### Offline Support
-- Device list is cached in localStorage
-- When offline, app displays cached device states
-- Requests are queued and retried when connection is restored
-
-### Disconnection Detection
-- Health check runs every 30 seconds
-- Connection status indicator in header shows real-time status
-- Network status banner appears when disconnected
-
----
-
-## Testing with cURL
-
-### Get All Devices
-```bash
-curl -X GET http://localhost:3000/api/devices
+**Response 404** (thiết bị không tồn tại):
+```json
+{
+  "success": false,
+  "error": "Device not found",
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
 ```
 
-### Get Device Status
-```bash
-curl -X GET http://localhost:3000/api/devices/1/status
-```
-
-### Control Device
+**Ví dụ cURL:**
 ```bash
 curl -X POST http://localhost:3000/api/devices/1/control \
   -H "Content-Type: application/json" \
-  -d '{"action":"ON","timestamp":"2024-03-22T10:30:00Z"}'
-```
-
-### Check Health
-```bash
-curl -X GET http://localhost:3000/api/health
+  -d '{"action": "ON"}'
 ```
 
 ---
 
-## WebSocket Connection (MQTT)
+## 4. Sensors — Cảm biến
 
-### Broker Details
-- URL: `ws://localhost:9001`
-- Protocol: MQTT over WebSocket
-- Auto-reconnect: Enabled
-- Reconnect interval: 3 seconds (max 5 attempts)
+### GET `/api/sensors/latest`
 
-### Testing with Mosquitto CLI
+Lấy dữ liệu cảm biến mới nhất (cập nhật theo dữ liệu MQTT cuối cùng từ ESP32).
 
-**Terminal 1 - Subscribe to sensor data:**
-```bash
-mosquitto_sub -h localhost -p 1883 -t "iot/sensor/+/data"
-```
+**Request**: Không có params.
 
-**Terminal 2 - Subscribe to device status:**
-```bash
-mosquitto_sub -h localhost -p 1883 -t "iot/device/+/status"
-```
-
-**Terminal 3 - Publish device command:**
-```bash
-mosquitto_pub -h localhost -p 1883 -t "iot/device/1/control" -m "ON"
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "temperature": {
+      "value": 27.5,
+      "unit": "°C",
+      "timestamp": "2026-05-04T02:00:00.000Z"
+    },
+    "humidity": {
+      "value": 65,
+      "unit": "%",
+      "timestamp": "2026-05-04T02:00:00.000Z"
+    },
+    "light": {
+      "value": 320.5,
+      "unit": "Lux",
+      "timestamp": "2026-05-04T02:00:00.000Z"
+    }
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
 ```
 
 ---
 
-## Version
-- API Version: 1.0.0
-- Last Updated: March 2024
+### GET `/api/sensors/temperature`
+
+Lấy riêng dữ liệu nhiệt độ.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "value": 27.5,
+    "unit": "°C",
+    "timestamp": "2026-05-04T02:00:00.000Z"
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+---
+
+### GET `/api/sensors/humidity`
+
+Lấy riêng dữ liệu độ ẩm.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "value": 65,
+    "unit": "%",
+    "timestamp": "2026-05-04T02:00:00.000Z"
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+---
+
+### GET `/api/sensors/light`
+
+Lấy riêng dữ liệu ánh sáng.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "value": 320.5,
+    "unit": "Lux",
+    "timestamp": "2026-05-04T02:00:00.000Z"
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+---
+
+### GET `/api/sensors/history`
+
+Lấy lịch sử dữ liệu cảm biến từ MongoDB, có phân trang. Mỗi bản ghi chứa đồng thời cả 3 giá trị (nhiệt độ, độ ẩm, ánh sáng).
+
+**Query Params:**
+
+| Param | Kiểu | Mặc định | Giới hạn | Mô tả |
+| :--- | :--- | :---: | :---: | :--- |
+| `page` | number | `1` | >= 1 | Số trang |
+| `limit` | number | `10` | 1–100 | Số bản ghi mỗi trang |
+
+**Ví dụ:** `GET /api/sensors/history?page=2&limit=10`
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "records": [
+      {
+        "id": 11,
+        "deviceId": "#A3F2",
+        "temperature": 27.9,
+        "humidity": 55,
+        "light": 117.22,
+        "timestamp": "02:00:00 04/05/2026"
+      }
+    ],
+    "total": 150,
+    "page": 2,
+    "limit": 10,
+    "totalPages": 15
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+**Cấu trúc SensorHistoryRecord:**
+
+| Trường | Kiểu | Mô tả |
+| :--- | :--- | :--- |
+| `id` | number | Số thứ tự (tính theo trang) |
+| `deviceId` | string | 4 ký tự cuối của MongoDB ObjectId |
+| `temperature` | number | Nhiệt độ (°C) |
+| `humidity` | number | Độ ẩm (%) |
+| `light` | number | Ánh sáng (Lux) |
+| `timestamp` | string | Định dạng `HH:mm:ss dd/MM/yyyy` |
+
+**Cấu trúc Pagination:**
+
+| Trường | Kiểu | Mô tả |
+| :--- | :--- | :--- |
+| `total` | number | Tổng số bản ghi trong DB |
+| `page` | number | Trang hiện tại |
+| `limit` | number | Số bản ghi/trang |
+| `totalPages` | number | Tổng số trang |
+
+---
+
+## 5. Activity — Lịch sử hoạt động
+
+### GET `/api/activity`
+
+Lấy lịch sử các hành động điều khiển thiết bị, có phân trang.
+
+**Query Params:**
+
+| Param | Kiểu | Mặc định | Giới hạn | Mô tả |
+| :--- | :--- | :---: | :---: | :--- |
+| `page` | number | `1` | >= 1 | Số trang |
+| `limit` | number | `10` | 1–100 | Số bản ghi mỗi trang |
+
+**Ví dụ:** `GET /api/activity?page=1&limit=10`
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "device": "Đèn chính",
+        "deviceId": "#1",
+        "action": "BẬT",
+        "status": "Thành công",
+        "timestamp": "02:00:00 04/05/2026"
+      }
+    ],
+    "total": 42,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+**Cấu trúc ActivityRecord:**
+
+| Trường | Kiểu | Giá trị |
+| :--- | :--- | :--- |
+| `id` | number | Số thứ tự |
+| `device` | string | Tên thiết bị (`"Đèn chính"`, `"Điều hòa"`, `"Quạt trần"`) |
+| `deviceId` | string | `"#1"`, `"#2"`, `"#3"` |
+| `action` | string | `"BẬT"` hoặc `"TẮT"` |
+| `status` | string | `"Thành công"` hoặc `"Thất bại"` |
+| `timestamp` | string | Định dạng `HH:mm:ss dd/MM/yyyy` |
+
+---
+
+### GET `/api/activity/stats`
+
+Thống kê số lần điều khiển theo ngày và theo thiết bị. Dữ liệu dạng chuỗi thời gian, dùng để vẽ biểu đồ.
+
+**Request**: Không có params.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "dates": [
+      {
+        "date": "04/05/2026",
+        "Đèn chính": 5,
+        "Điều hòa": 3,
+        "Quạt trần": 2
+      }
+    ],
+    "devices": ["Đèn chính", "Điều hòa", "Quạt trần"]
+  },
+  "timestamp": "2026-05-04T02:00:00.000Z"
+}
+```
+
+---
+
+## 6. MQTT Topics
+
+Backend subscribe/publish theo cấu trúc topic sau:
+
+### Subscribe (Backend lắng nghe)
+
+| Topic | Payload | Mô tả |
+| :--- | :--- | :--- |
+| `iot/sensor/temperature/data` | `{"value": 27.5, "unit": "°C"}` | Nhiệt độ từ ESP32 |
+| `iot/sensor/humidity/data` | `{"value": 65, "unit": "%"}` | Độ ẩm từ ESP32 |
+| `iot/sensor/light/data` | `{"value": 320, "unit": "Lux"}` | Ánh sáng từ ESP32 |
+| `iot/sensor/all` | `{"temperature": 27.5, "humidity": 65, "light": 320}` | Gửi đồng thời cả 3 giá trị, backend lưu MongoDB |
+| `iot/device/+/status` | `{"status": true}` | Phần cứng báo lại trạng thái sau khi thực thi lệnh |
+
+### Publish (Backend gửi lệnh)
+
+| Topic | Payload | Mô tả |
+| :--- | :--- | :--- |
+| `iot/device/1/control` | `"ON"` hoặc `"OFF"` | Điều khiển Đèn chính |
+| `iot/device/2/control` | `"ON"` hoặc `"OFF"` | Điều khiển Điều hòa |
+| `iot/device/3/control` | `"ON"` hoặc `"OFF"` | Điều khiển Quạt trần |
+
+### Kiểm thử MQTT bằng Mosquitto
+
+```bash
+# Publish dữ liệu cảm biến (mô phỏng ESP32)
+mosquitto_pub -h localhost -p 1883 \
+  -t "iot/sensor/all" \
+  -m '{"temperature":27.5,"humidity":65,"light":320}'
+
+# Bật đèn chính (mô phỏng frontend)
+mosquitto_pub -h localhost -p 1883 \
+  -t "iot/device/1/control" -m "ON"
+
+# Theo dõi tất cả topic
+mosquitto_sub -h localhost -p 1883 -t "iot/#"
+```
+
+---
+
+## 7. Mã lỗi HTTP
+
+| HTTP Code | Ý nghĩa | Nguyên nhân phổ biến |
+| :---: | :--- | :--- |
+| 200 | OK | Request thành công |
+| 400 | Bad Request | `action` không phải `ON`/`OFF` |
+| 404 | Not Found | `deviceId` không tồn tại / route sai |
+| 500 | Internal Server Error | Lỗi MongoDB, lỗi MQTT hoặc lỗi server |
+| 503 | Service Unavailable | MongoDB chưa kết nối được |
+
+---
+
+## 8. Danh sách tất cả Endpoint
+
+| Method | Endpoint | Mô tả |
+| :--- | :--- | :--- |
+| GET | `/api/health` | Kiểm tra trạng thái server |
+| GET | `/api/devices` | Danh sách tất cả thiết bị |
+| GET | `/api/devices/:id/status` | Trạng thái một thiết bị |
+| POST | `/api/devices/:id/control` | Bật/tắt thiết bị |
+| GET | `/api/sensors/latest` | Dữ liệu cảm biến mới nhất |
+| GET | `/api/sensors/temperature` | Nhiệt độ mới nhất |
+| GET | `/api/sensors/humidity` | Độ ẩm mới nhất |
+| GET | `/api/sensors/light` | Ánh sáng mới nhất |
+| GET | `/api/sensors/history` | Lịch sử cảm biến (phân trang) |
+| GET | `/api/activity` | Lịch sử hoạt động thiết bị (phân trang) |
+| GET | `/api/activity/stats` | Thống kê hành động theo ngày |
+
+---
+
+**Phiên bản**: 1.1.0  
+**Cập nhật**: 04/05/2026  
+**Tác giả**: Nguyễn Mạnh Đức (B22DCPT061) — D22CQPT01
